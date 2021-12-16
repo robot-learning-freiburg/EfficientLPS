@@ -1,0 +1,24 @@
+Metadata-Version: 1.2
+Name: geffnet
+Version: 1.0.1
+Summary: (Generic) EfficientNets for PyTorch
+Home-page: https://github.com/rwightman/gen-efficientnet-pytorch
+Author: Ross Wightman
+Author-email: hello@rwightman.com
+License: UNKNOWN
+Description: UNKNOWN
+Keywords: pytorch pretrained models efficientnet mixnet mobilenetv3 mnasnet
+Platform: UNKNOWN
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Education
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Topic :: Scientific/Engineering
+Classifier: Topic :: Scientific/Engineering :: Artificial Intelligence
+Classifier: Topic :: Software Development
+Classifier: Topic :: Software Development :: Libraries
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Requires-Python: >=3.6
