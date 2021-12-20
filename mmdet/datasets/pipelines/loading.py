@@ -130,7 +130,7 @@ class LoadLidarFromFile(object):
         bboxes = []
         for inst_i in np.unique(mapped_inst):
             if inst_i != 255 and inst_i // 1000 < results['stuff_id']:                
-                gt_labels.append(inst_i // 1000)
+                gt_labels.append((inst_i // 1000) + 1)
                 mask = mapped_inst == inst_i
                 gt_masks.append(np.uint8(mask))
                 # bbox computation for a segment

@@ -62,7 +62,7 @@ class EfficientLPS(BaseDetector):
                                                  in_chans=backbone['in_chans'], 
                                                  act_layer=backbone['act_cfg']['type'],
                                                  norm_layer=norm_cfg[backbone['norm_cfg']['type']][1],
-                                                 proximity=True)
+                                                 proximity=False)
 
             self.ren = geffnet.create_model('tf_efficientnet_ren', 
                                             pretrained=False,
@@ -201,10 +201,21 @@ class EfficientLPS(BaseDetector):
                               img_metas[0]['sensor_img_means'][0], 
                               img_metas[0]['sensor_img_stds'][0])
         losses = dict()
-
+        
         semantic_logits = self.semantic_head(x[:4], x_range[:4])
         loss_seg = self.semantic_head.loss(semantic_logits, gt_semantic_seg)
         losses.update(loss_seg)
+        instance_flags = [len(gt_label)!= 0 for gt_label in gt_labels] 
+
+        if np.sum(instance_flags) == 0:
+            loss_i = sum(x_i.sum() for x_i in x) * 0
+            instance_losses = dict(loss_rpn_cls=loss_i,
+                                   loss_rpn_bbox=loss_i,
+                                   loss_cls=loss_i,
+                                   loss_bbox=loss_i,
+                                   loss_mask=loss_i)
+            losses.update(instance_losses)
+            return losses
 
         rpn_outs = self.rpn_head(x)
         rpn_loss_inputs = rpn_outs + (gt_bboxes, img_metas,

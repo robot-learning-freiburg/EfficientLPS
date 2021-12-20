@@ -396,17 +396,17 @@ class RangeAwareFPN(nn.Module):
             self.fpn_convs[i](laterals_top[i]+laterals_bottom[::-1][i]) for i in range(used_backbone_levels)
         ]
 
-        outs_with_range = [
-            self.lateral_convs_range[i](torch.cat((laterals_top[i]+laterals_bottom[::-1][i], in_range[i]), 1)) for i in range(used_backbone_levels)
-        ]
+        #outs_with_range = [
+        #    self.lateral_convs_range[i](torch.cat((laterals_top[i]+laterals_bottom[::-1][i], in_range[i]), 1)) for i in range(used_backbone_levels)
+        #]
 
-        weights = [
-            self.lateral_convs_prob[i](outs_with_range[i]).sigmoid() for i in range(used_backbone_levels)
-        ]
+        #weights = [
+        #    self.lateral_convs_prob[i](outs_with_range[i]).sigmoid() for i in range(used_backbone_levels)
+        #]
 
-        outs = [
-            (outs_with_range[i] * weights[i] + outs_without_range[i] * weights[i])  for i in range(used_backbone_levels)
-        ]
+        outs = outs_without_range#[
+        #    (outs_with_range[i] * weights[i] + outs_without_range[i] * weights[i])  for i in range(used_backbone_levels)
+        #]
         # part 2: add extra levels
         if self.num_outs > len(outs):
             # use max pool to get more levels on top of outputs
