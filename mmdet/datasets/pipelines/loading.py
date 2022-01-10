@@ -7,6 +7,7 @@ import pycocotools.mask as maskUtils
 
 from ..registry import PIPELINES
 from ..laserscan_unfolding import LaserScan, SemLaserScan
+import cv2
 
 @PIPELINES.register_module
 class LoadImageFromFile(object):
@@ -122,14 +123,12 @@ class LoadLidarFromFile(object):
         return results
 
     def _load_instance_seg(self, results, inst, sem):
-        class_mask = sem == 255
         mapped_inst = sem * 1000 + inst
-        mapped_inst[class_mask] = 255
         gt_labels = []
         gt_masks = []
         bboxes = []
         for inst_i in np.unique(mapped_inst):
-            if inst_i != 255 and inst_i // 1000 < results['stuff_id']:                
+            if inst_i != 255000 and inst_i // 1000 < results['stuff_id']:                
                 gt_labels.append((inst_i // 1000) + 1)
                 mask = mapped_inst == inst_i
                 gt_masks.append(np.uint8(mask))
@@ -142,9 +141,9 @@ class LoadLidarFromFile(object):
                 vert_idx = np.nonzero(vert)[0]
                 y = vert_idx[0]
                 height = vert_idx[-1] - y + 1
-                bbox = [int(x), int(y), int(width), int(height)]
-                bboxes.append(bbox)                
- 
+                bbox = [int(x), int(y), int(x + width), int(y + height)]
+                bboxes.append(bbox)            
+
         results['gt_bboxes'] = bboxes
         results['gt_labels'] = gt_labels
         results['bbox_fields'].append('gt_bboxes')
@@ -218,7 +217,7 @@ class LoadAnnotations(object):
         return results
 
     def _poly2mask(self, mask_ann, img_h, img_w):
-        #print (mask_ann)
+        
         if isinstance(mask_ann, list):
             # polygon -- a single object might consist of multiple parts
             # we merge all parts into one mask rle code

@@ -123,13 +123,13 @@ test_cfg = dict(
         nms_thr=0.7,
         min_bbox_size=0),
     rcnn=dict(
-        score_thr=0.5,
+        score_thr=0.0,
         nms=dict(type='nms', iou_thr=0.5),
         max_per_img=100,
         mask_thr_binary=0.5),
     panoptic=dict(
-        overlap_thr=0.5,
-        min_stuff_area=2048))
+        overlap_thr=0.1,
+        min_stuff_area=4096))
 # dataset settings
 dataset_type = 'SemanticKITTIDataset'
 data_root = '/home/mohan/mot_challenge/lidar_track/epsnet/scripts/kalman/'
@@ -140,20 +140,13 @@ train_pipeline = [
     dict(type='DefaultFormatBundle'),
     dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels', 'gt_masks', 'gt_semantic_seg']),
 ]
+
 test_pipeline = [
-    dict(type='LoadImageFromFile'),
-    dict(
-        type='MultiScaleFlipAug',
-        img_scale=(2048, 1024),
-        flip=False,
-        transforms=[
-            dict(type='Resize', keep_ratio=True),
-            dict(type='RandomFlip'),
-#            dict(type='Normalize', **img_norm_cfg),
-            dict(type='Pad', size_divisor=32),
-            dict(type='ImageToTensor', keys=['img']),
-            dict(type='Collect', keys=['img']),
-        ])
+    dict(type='LoadLidarFromFile', project=True, H=64, W=2048, fov_up=3.0, fov_down=-25.0, gt=True, max_points=150000,
+                sensor_img_means = [12.12, 10.88, 0.23, -1.04, 0.21], sensor_img_stds = [12.32, 11.47, 6.91, 0.86, 0.16]),
+    dict(type='Resize', img_scale=(4096, 256), multiscale_mode='value', keep_ratio=False),
+    dict(type='DefaultFormatBundle'),
+    dict(type='Collect', keys=['img']),
 ]
 
 data = dict(
@@ -175,7 +168,7 @@ data = dict(
         type=dataset_type,
         ann_file=data_root+'sequences',
         config='configs/semantic-kitti.yaml',
-        split='test',
+        split='valid',
         pipeline=test_pipeline))
 evaluation = dict(interval=1, metric=['panoptic'])
 # optimizer

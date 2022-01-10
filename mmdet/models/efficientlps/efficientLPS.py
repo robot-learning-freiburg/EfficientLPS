@@ -96,6 +96,7 @@ class EfficientLPS(BaseDetector):
        
         self.num_classes = semantic_head['num_classes']
         self.num_stuff = self.num_classes - bbox_head['num_classes'] + 1
+        self.post = KNN(self.num_classes)
         self.init_weights(pretrained=pretrained)
 
     def init_weights(self, pretrained=None):
@@ -201,7 +202,6 @@ class EfficientLPS(BaseDetector):
                               img_metas[0]['sensor_img_means'][0], 
                               img_metas[0]['sensor_img_stds'][0])
         losses = dict()
-        
         semantic_logits = self.semantic_head(x[:4], x_range[:4])
         loss_seg = self.semantic_head.loss(semantic_logits, gt_semantic_seg)
         losses.update(loss_seg)
@@ -269,7 +269,6 @@ class EfficientLPS(BaseDetector):
 
 
     def simple_test(self, img, img_metas, proposals=None, rescale=False, eval=None):
-
         x, x_range = self.extract_feat(img, 
                               img_metas[0]['sensor_img_means'][0], 
                               img_metas[0]['sensor_img_stds'][0])
@@ -281,7 +280,6 @@ class EfficientLPS(BaseDetector):
 
             det_bboxes, det_labels = self.simple_test_bboxes(x, 
                 img_metas, proposal_list, self.test_cfg.rcnn, rescale=rescale)
-        
             if eval is not None:
                        
                 panoptic_mask, cat_ = self.simple_test_mask_(
@@ -405,17 +403,17 @@ class EfficientLPS(BaseDetector):
             start_t = 0
             end_t = self.num_classes - self.num_stuff 
 
-        ori_shape = img_metas[0]['ori_shape']
-        print (ori_shape)
+        ori_shape = img_metas[0]['ori_shape'][1:]
         scale_factor = img_metas[0]['scale_factor']
-        ref_size = (np.int(np.round(ori_shape[0]*scale_factor)), 
-                    np.int(np.round(ori_shape[1]*scale_factor)))
+        ref_size = (np.int(np.round(ori_shape[0]*scale_factor[1])), 
+                    np.int(np.round(ori_shape[1]*scale_factor[0])))
         semantic_logits = F.interpolate(semantic_logits, size=ref_size, 
                                    mode="bilinear", align_corners=False)   
         sem_pred = torch.argmax(torch.cat([semantic_logits[0:1, start:end], 
                                 semantic_logits[0:1, start_t:end_t]], dim=1), dim=1)[0]
         panoptic_mask = torch.zeros_like(sem_pred, dtype=torch.long)
         cat = [255]
+
         if det_bboxes.shape[0] == 0:
             intermediate_logits = semantic_logits[0, start:end] 
         else:
@@ -434,13 +432,14 @@ class EfficientLPS(BaseDetector):
             mask_pred = self.mask_head(mask_feats)
             confidence = det_bboxes[:,4]
             idx = torch.argsort(confidence, descending=True)
-            bbx_inv = invert_roi_bbx(det_bboxes[:, :4], 
-                      tuple(mask_pred.shape[2:]), ref_size)
+            bbx_inv = invert_roi_bbx(_bboxes, 
+                      tuple(mask_pred.shape[-2:]), ref_size)
             bbx_idx = torch.arange(0, det_bboxes.size(0), 
                       dtype=torch.long, device=det_bboxes.device)
             
             mask_pred = roi_sampling(mask_pred, bbx_inv, bbx_idx, 
                         ref_size, padding="zero")
+
             ML_A = mask_pred.new_zeros(mask_pred.shape[0], mask_pred.shape[-2], 
                                              mask_pred.shape[-1])
             ML_B = ML_A.clone()             
@@ -498,20 +497,24 @@ class EfficientLPS(BaseDetector):
         bool_mask = new_sem_pred != self.num_stuff   
         panoptic_mask[bool_mask] = new_sem_pred[bool_mask] + total_unique 
         #remap
-        cat_ = cat_ - offset
+        cat_ = cat_ - start_t
         cat_ = torch.cat((cat_, (cls_stuff + stuff_id).cpu().long()), -1)   
-
         #back to 3D
-        predcition_img = Image.fromarray(np.uint8(panoptic_mask.cpu().numpy()))
-        predcition_img = predcition_img.resize(ori_shape[::-1], resample=Image.NEAREST)
-        predcition_img = np.array(predcition_img, dtype=np.uint32, copy=False)
+        prediction_img = Image.fromarray(np.uint8(panoptic_mask.cpu().numpy()))
+        prediction_img = prediction_img.resize(ori_shape[::-1], resample=Image.NEAREST)
+        prediction_img = np.array(prediction_img, dtype=np.uint32, copy=False)
         cat = cat_.cpu().numpy()
-        predcition_img, cat = self.compact_labels(predcition_img, cat)
+        prediction_img, cat = self.compact_labels(prediction_img, cat)
         cat = torch.from_numpy(cat.astype(np.long))
-        predcition_img = torch.from_numpy(predcition_img.astype(np.long))
-        proj_argmax = predcition_img.cuda(panoptic_mask.device)
-        unproj_argmax = self.post(img_metas[0]['proj_range'], img_metas[0]['unproj_range'], proj_argmax, 
-                                  img_metas[0]['proj_x'], img_metas[0]['proj_y'], torch.max(proj_argmax) + 1)
+        prediction_img = torch.from_numpy(prediction_img.astype(np.long))
+        device = panoptic_mask.device
+        proj_argmax = prediction_img.cuda(device)
+        n_points = img_metas[0]['unproj_n_points']
+        unproj_argmax = self.post(img_metas[0]['proj_range'][:n_points].cuda(device), 
+                                  img_metas[0]['unproj_range'][:n_points].cuda(device), proj_argmax, 
+                                  img_metas[0]['proj_x'][:n_points].cuda(device), 
+                                  img_metas[0]['proj_y'][:n_points].cuda(device), 
+                                  torch.max(proj_argmax) + 1)
         unprojsem_argmax = cat[unproj_argmax] 
         pred_np = unprojsem_argmax.cpu().numpy()
         pred_np = pred_np.reshape((-1)).astype(np.uint32)

@@ -8,6 +8,7 @@ from torch.utils.data import Dataset
 
 
 from mmdet.core import eval_map, eval_recalls
+from mmdet.utils import print_log
 from .pipelines import Compose
 from .registry import DATASETS
 from .eval_np import PanopticEval
@@ -51,6 +52,7 @@ class SemanticKITTIDataset(Dataset):
                  proposal_file=None,
                  test_mode=False,
                  filter_empty_gt=False):
+
         self.ann_file = ann_file
         self.data_root = data_root
         self.config = config
@@ -137,7 +139,7 @@ class SemanticKITTIDataset(Dataset):
             return self.prepare_test_img(idx)
         while True:
             data = self.prepare_train_img(idx)
-            if data is None:
+            if data is None or (len(data['gt_labels'].data) == 0):
                 idx = self._rand_another(idx)
                 continue
             return data
@@ -158,8 +160,14 @@ class SemanticKITTIDataset(Dataset):
         return self.pipeline(results)
 
     def prepare_test_img(self, idx):
-        img_info = self.img_infos[idx]
-        results = dict(img_info=img_info)
+        label_info = self.vel_seq_infos[idx].replace('velodyne', 'labels').replace('.bin', '.label')
+        img_info = {
+                    'filename': self.vel_seq_infos[idx],
+                    'width': WIDTH,
+                    'height': HEIGHT,
+                    'ann': label_info
+                    }
+        results = dict(img_info=img_info, class_lut=self.class_lut, stuff_id=STUFF_START_ID)
         if self.proposals is not None:
             results['proposals'] = self.proposals[idx]
         self.pre_pipeline(results)
@@ -175,12 +183,13 @@ class SemanticKITTIDataset(Dataset):
                  proposal_nums=(100, 300, 1000),
                  min_points=50):
 
-        class_evaluator = PanopticEval(self.nr_classes, None, self.ignore_class, min_points=min_points)
+        ignore_class = [cl for cl, ignored in self.class_ignore.items() if ignored] 
+        class_evaluator = PanopticEval(self.nr_classes, None, ignore_class, min_points=min_points)
         test_sequences = self.cfg['split'][self.split]
         label_names = []
         for sequence in test_sequences:
             sequence = '{0:02d}'.format(int(sequence))
-            label_paths = os.path.join(self.data_root, sequence, "labels")
+            label_paths = os.path.join(self.ann_file, sequence, "labels")
             seq_label_names = sorted([os.path.join(label_paths, fn) for fn in os.listdir(label_paths) if fn.endswith(".label")])
             label_names.extend(seq_label_names)
         
@@ -215,6 +224,8 @@ class SemanticKITTIDataset(Dataset):
             label = np.fromfile(pred_file, dtype=np.uint32)
 
             u_pred_sem_class = label & 0xFFFF  # remap to xentropy format
+            u_pred_sem_class += 1
+            u_pred_sem_class[u_pred_sem_class == 256] = 0 
             u_pred_inst = label # unique instance ids.
 
             class_evaluator.addBatch(u_pred_sem_class, u_pred_inst, u_label_sem_class, u_label_inst)
@@ -263,18 +274,25 @@ class SemanticKITTIDataset(Dataset):
             output_dict[class_str]["RQ"] = rq
             output_dict[class_str]["IoU"] = iou
 
+        msg = "{:14s}| {:>5s}  {:>5s}  {:>5s}".format("Category", "PQ", "SQ", "RQ")
+        print_log(msg, logger=logger)
+
         PQ_all = np.mean([float(output_dict[c]["PQ"]) for c in all_classes])
         PQ_dagger = np.mean([float(output_dict[c]["PQ"]) for c in things] + [float(output_dict[c]["IoU"]) for c in stuff])
         RQ_all = np.mean([float(output_dict[c]["RQ"]) for c in all_classes])
         SQ_all = np.mean([float(output_dict[c]["SQ"]) for c in all_classes])
+        self.log_results('All', PQ_all, RQ_all, SQ_all, logger)
 
         PQ_things = np.mean([float(output_dict[c]["PQ"]) for c in things])
         RQ_things = np.mean([float(output_dict[c]["RQ"]) for c in things])
         SQ_things = np.mean([float(output_dict[c]["SQ"]) for c in things])
+        self.log_results('Things', PQ_things, RQ_things, SQ_things, logger)
 
         PQ_stuff = np.mean([float(output_dict[c]["PQ"]) for c in stuff])
         RQ_stuff = np.mean([float(output_dict[c]["RQ"]) for c in stuff])
         SQ_stuff = np.mean([float(output_dict[c]["SQ"]) for c in stuff])
+        self.log_results('Stuff', PQ_stuff, RQ_stuff, SQ_stuff, logger)
+
         mIoU = output_dict["all"]["IoU"]
 
         codalab_output = {}
@@ -299,11 +317,18 @@ class SemanticKITTIDataset(Dataset):
                 "rq": "{:.3}".format(entry["RQ"]),
                 "iou": "{:.3}".format(entry["IoU"])
             })
-
         print('Generating output files in tmpDir')
         # save to yaml
         output_filename = os.path.join('tmpDir', 'scores.txt')
         with open(output_filename, 'w') as outfile:
             yaml.dump(codalab_output, outfile, default_flow_style=False)
 
+    def log_results(self, metric, pq, rq, sq, logger):
+        msg = "{:14s}| {:5.1f}  {:5.1f}  {:5.1f}".format(
+                    metric,
+                    100 * pq,
+                    100 * rq,
+                    100 * sq,
+                )
+        print_log(msg, logger=logger)
 

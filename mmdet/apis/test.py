@@ -27,7 +27,7 @@ def single_gpu_test(model, data_loader, show=False, eval=None):
         if show:
             model.module.show_result(data, result)
 
-        batch_size = data['img'][0].size(0)
+        batch_size = len(data['img'])
 
         for _ in range(batch_size):
             prog_bar.update()
@@ -70,10 +70,9 @@ def multi_gpu_test(model, data_loader, tmpdir=None, gpu_collect=False, eval=None
             pass
 
         if rank == 0:
-            batch_size = data['img'][0].size(0)
+            batch_size = len(data['img'])
             for _ in range(batch_size * world_size):
                 prog_bar.update()
-
     # collect results from all ranks
    
     if gpu_collect:

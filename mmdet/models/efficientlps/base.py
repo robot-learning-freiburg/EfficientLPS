@@ -104,19 +104,17 @@ class BaseDetector(nn.Module, metaclass=ABCMeta):
                 augs (multiscale, flip, etc.) and the inner list indicates
                 images in a batch.
         """
-        for var, name in [(imgs, 'imgs'), (img_metas, 'img_metas')]:
+        for var, name in [(imgs, 'imgs'),]:
             if not isinstance(var, list):
-                raise TypeError('{} must be a list, but got {}'.format(
-                    name, type(var)))
-
-        num_augs = len(imgs)
-        if num_augs != len(img_metas):
-            raise ValueError(
-                'num of augmentations ({}) != num of image meta ({})'.format(
-                    len(imgs), len(img_metas)))
-        # TODO: remove the restriction of imgs_per_gpu == 1 when prepared
-        imgs_per_gpu = imgs[0].size(0)
-#        assert imgs_per_gpu == 1
+                num_augs = 1
+            else:
+                num_augs = len(imgs)
+                if num_augs != len(img_metas):
+                    raise ValueError(
+                        'num of augmentations ({}) != num of image meta ({})'.format(
+                            len(imgs), len(img_metas)))
+                # TODO: remove the restriction of imgs_per_gpu == 1 when prepared
+                imgs_per_gpu = imgs[0].size(0)
 
         if num_augs == 1:
             """
@@ -127,7 +125,7 @@ class BaseDetector(nn.Module, metaclass=ABCMeta):
             """
             if 'proposals' in kwargs:
                 kwargs['proposals'] = kwargs['proposals'][0]
-            return self.simple_test(imgs[0], img_metas[0], eval=eval, **kwargs)
+            return self.simple_test(imgs, img_metas, eval=eval, **kwargs)
         else:
             # TODO: support test augmentation for predefined proposals
             assert 'proposals' not in kwargs

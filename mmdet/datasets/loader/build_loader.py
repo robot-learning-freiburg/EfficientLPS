@@ -55,7 +55,7 @@ def build_dataloader(dataset,
                                               world_size, rank)
         else:
             sampler = DistributedSampler(
-                dataset, world_size, rank, shuffle=False)
+                dataset, world_size, rank, imgs_per_gpu, shuffle=False)
         batch_size = imgs_per_gpu
         num_workers = workers_per_gpu
     else:
