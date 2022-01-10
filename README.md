@@ -48,6 +48,44 @@ d. Install EfficientLPS implementation
 cd ..
 python setup.py develop
 ```
+## Prepare datasets
+### Semantic KITTI
+- Download the dataset from [here](http://semantic-kitti.org/).
+- Expected Folder Structure:
+```
+/kitti/dataset/
+          └── sequences/
+                  ├── 00/
+                  │   ├── poses.txt
+                  │   ├── image_2/
+                  │   ├── image_3/
+                  │   ├── labels/
+                  │   │     ├ 000000.label
+                  │   │     └ 000001.label
+                  │   └── velodyne/
+                  │         ├ 000000.bin
+                  │         └ 000001.bin
+                  ├── 01/
+                  ├── 02/
+                  .
+                  .
+                  .
+                  └── 21/
+```
+- In config file set the data_root variable to your own full path of /kitti/dataset/
+
+## Training and Evaluation
+### Training Procedure
+Edit the config file appropriately in configs folder and run the following command:
+```
+./tools/dist_train.sh efficientPS_multigpu_sample.py ${GPU_NUM} --work_dir ../work_dirs/checkpoints --validate 
+```
+* --resume_from ${CHECKPOINT_FILE}: Resume from a previous checkpoint file.
+### Evaluation Procedure
+Run the following command for evaluation:
+```
+./tools/dist_test.sh efficientPS_multigpu_sample.py ${CHECKPOINT_FILE} ${GPU_NUM} --eval panoptic
+```
 
 ### Todo
 
@@ -55,7 +93,6 @@ python setup.py develop
 - [ ] Add support for Panoptic nuScenes  
 - [ ] Add panoptic periphery loss
 - [ ] Add pre-trained models
-- [ ] Add training and evaluation instructions
 
 ## Acknowledgements
 We have used utility functions from other open-source projects. We espeicially thank the authors of:
