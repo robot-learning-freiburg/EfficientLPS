@@ -87,13 +87,6 @@ Run the following command for evaluation:
 ./tools/dist_test.sh efficientPS_multigpu_sample.py ${CHECKPOINT_FILE} ${GPU_NUM} --eval panoptic
 ```
 
-### Todo
-
-- [ ] Add inference script  
-- [ ] Add support for Panoptic nuScenes  
-- [ ] Add panoptic periphery loss
-- [ ] Add pre-trained models
-
 ## Acknowledgements
 We have used utility functions from other open-source projects. We espeicially thank the authors of:
 - [mmdetection](https://github.com/open-mmlab/mmdetection)

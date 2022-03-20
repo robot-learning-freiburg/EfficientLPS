@@ -62,7 +62,7 @@ class EfficientLPS(BaseDetector):
                                                  in_chans=backbone['in_chans'], 
                                                  act_layer=backbone['act_cfg']['type'],
                                                  norm_layer=norm_cfg[backbone['norm_cfg']['type']][1],
-                                                 proximity=False)
+                                                 proximity=True)
 
             self.ren = geffnet.create_model('tf_efficientnet_ren', 
                                             pretrained=False,

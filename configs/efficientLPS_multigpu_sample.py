@@ -132,7 +132,7 @@ test_cfg = dict(
         min_stuff_area=4096))
 # dataset settings
 dataset_type = 'SemanticKITTIDataset'
-data_root = '/home/mohan/mot_challenge/lidar_track/epsnet/scripts/kalman/'
+data_root = 'path_to_dataset_folder'
 train_pipeline = [
     dict(type='LoadLidarFromFile', project=True, H=64, W=2048, fov_up=3.0, fov_down=-25.0, gt=True, max_points=150000,
                 sensor_img_means = [12.12, 10.88, 0.23, -1.04, 0.21], sensor_img_stds = [12.32, 11.47, 6.91, 0.86, 0.16]),
