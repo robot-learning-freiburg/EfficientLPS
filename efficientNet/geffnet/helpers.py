@@ -4,7 +4,7 @@ Copyright 2020 Ross Wightman
 import torch
 import os
 from collections import OrderedDict
-from mmdet.utils import get_root_logger
+from mmdet2.utils import get_root_logger
 from mmcv.runner.checkpoint import load_state_dict
 
 try:

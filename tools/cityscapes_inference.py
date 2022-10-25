@@ -10,18 +10,18 @@ from mmcv.parallel import MMDataParallel, MMDistributedDataParallel
 from mmcv.runner import get_dist_info, init_dist, load_checkpoint
 from tools.fuse_conv_bn import fuse_module
 
-from mmdet.apis import multi_gpu_test, single_gpu_test
-from mmdet.core import wrap_fp16_model
-from mmdet.datasets import build_dataloader, build_dataset
-from mmdet.models import build_detector
-from mmdet.apis import init_detector, inference_detector, show_result
-from mmdet.core import cityscapes_originalIds
+from mmdet2.apis import multi_gpu_test, single_gpu_test
+from mmdet2.core import wrap_fp16_model
+from mmdet2.datasets import build_dataloader, build_dataset
+from mmdet2.models import build_detector
+from mmdet2.apis import init_detector, inference_detector, show_result
+from mmdet2.core import cityscapes_originalIds
 
 from PIL import Image
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description='MMDet test (and eval) a model')
+        description='mmdet2 test (and eval) a model')
     parser.add_argument('config', help='test config file path')
     parser.add_argument('checkpoint', help='checkpoint file')
     parser.add_argument('input', help='input folder')

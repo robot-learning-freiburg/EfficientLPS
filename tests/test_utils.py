@@ -1,6 +1,6 @@
 import numpy.testing as npt
 
-from mmdet.utils.flops_counter import params_to_string
+from mmdet2.utils.flops_counter import params_to_string
 
 
 def test_params_to_string():

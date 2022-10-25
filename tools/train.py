@@ -13,11 +13,11 @@ warnings.filterwarnings("ignore", category=UserWarning)
 from mmcv import Config
 from mmcv.runner import init_dist
 
-from mmdet import __version__
-from mmdet.apis import set_random_seed, train_detector
-from mmdet.datasets import build_dataset
-from mmdet.models import build_detector
-from mmdet.utils import collect_env, get_root_logger
+from mmdet2 import __version__
+from mmdet2.apis import set_random_seed, train_detector
+from mmdet2.datasets import build_dataset
+from mmdet2.models import build_detector
+from mmdet2.utils import collect_env, get_root_logger
 
 
 def parse_args():
@@ -123,7 +123,7 @@ def main():
         val_dataset.pipeline = cfg.data.train.pipeline
         datasets.append(build_dataset(val_dataset))
     if cfg.checkpoint_config is not None:
-        # save mmdet version, config file content and class names in
+        # save mmdet2 version, config file content and class names in
         # checkpoints as meta data
         cfg.checkpoint_config.meta = dict(
             mmdet_version=__version__,

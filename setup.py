@@ -43,7 +43,7 @@ if PATCH != '':
 else:
     SHORT_VERSION = '{}.{}{}'.format(MAJOR, MINOR, SUFFIX)
 
-version_file = 'mmdet/version.py'
+version_file = 'mmdet2/version.py'
 
 
 def get_git_hash():
@@ -77,7 +77,7 @@ def get_hash():
         sha = get_git_hash()[:7]
     elif os.path.exists(version_file):
         try:
-            from mmdet.version import __version__
+            from mmdet2.version import __version__
             sha = __version__.split('+')[-1]
         except ImportError:
             raise ImportError('Unable to get git version')
@@ -212,7 +212,7 @@ def parse_requirements(fname='requirements.txt', with_version=True):
 if __name__ == '__main__':
     write_version_py()
     setup(
-        name='mmdet',
+        name='mmdet2',
         version=get_version(),
         description='Open MMLab Detection Toolbox and Benchmark',
         long_description=readme(),
@@ -221,7 +221,7 @@ if __name__ == '__main__':
         keywords='computer vision, object detection',
         url='https://github.com/open-mmlab/mmdetection',
         packages=find_packages(exclude=('configs', 'tools', 'demo')),
-        package_data={'mmdet.ops': ['*/*.so']},
+        package_data={'mmdet2.ops': ['*/*.so']},
         classifiers=[
             'Development Status :: 4 - Beta',
             'License :: OSI Approved :: Apache Software License',
@@ -244,19 +244,19 @@ if __name__ == '__main__':
         ext_modules=[
             make_cuda_ext(
                 name='compiling_info',
-                module='mmdet.ops.utils',
+                module='mmdet2.ops.utils',
                 sources=['src/compiling_info.cpp']),
             make_cuda_ext(
                 name='nms_cpu',
-                module='mmdet.ops.nms',
+                module='mmdet2.ops.nms',
                 sources=['src/nms_cpu.cpp']),
             make_cuda_ext(
                 name='nms_cuda',
-                module='mmdet.ops.nms',
+                module='mmdet2.ops.nms',
                 sources=['src/nms_cuda.cpp', 'src/nms_kernel.cu']),
             make_cuda_ext(
                 name='roi_align_cuda',
-                module='mmdet.ops.roi_align',
+                module='mmdet2.ops.roi_align',
                 sources=[
                     'src/roi_align_cuda.cpp',
                     'src/roi_align_kernel.cu',
@@ -264,58 +264,58 @@ if __name__ == '__main__':
                 ]),
             make_cuda_ext(
                 name='roi_pool_cuda',
-                module='mmdet.ops.roi_pool',
+                module='mmdet2.ops.roi_pool',
                 sources=['src/roi_pool_cuda.cpp', 'src/roi_pool_kernel.cu']),
             make_cuda_ext(
                 name='deform_conv_cuda',
-                module='mmdet.ops.dcn',
+                module='mmdet2.ops.dcn',
                 sources=[
                     'src/deform_conv_cuda.cpp',
                     'src/deform_conv_cuda_kernel.cu'
                 ]),
             make_cuda_ext(
                 name='deform_pool_cuda',
-                module='mmdet.ops.dcn',
+                module='mmdet2.ops.dcn',
                 sources=[
                     'src/deform_pool_cuda.cpp',
                     'src/deform_pool_cuda_kernel.cu'
                 ]),
             make_cuda_ext(
                 name='sigmoid_focal_loss_cuda',
-                module='mmdet.ops.sigmoid_focal_loss',
+                module='mmdet2.ops.sigmoid_focal_loss',
                 sources=[
                     'src/sigmoid_focal_loss.cpp',
                     'src/sigmoid_focal_loss_cuda.cu'
                 ]),
             make_cuda_ext(
                 name='masked_conv2d_cuda',
-                module='mmdet.ops.masked_conv',
+                module='mmdet2.ops.masked_conv',
                 sources=[
                     'src/masked_conv2d_cuda.cpp', 'src/masked_conv2d_kernel.cu'
                 ]),
             make_cuda_ext(
                 name='affine_grid_cuda',
-                module='mmdet.ops.affine_grid',
+                module='mmdet2.ops.affine_grid',
                 sources=['src/affine_grid_cuda.cpp']),
             make_cuda_ext(
                 name='grid_sampler_cuda',
-                module='mmdet.ops.grid_sampler',
+                module='mmdet2.ops.grid_sampler',
                 sources=[
                     'src/cpu/grid_sampler_cpu.cpp',
                     'src/cuda/grid_sampler_cuda.cu', 'src/grid_sampler.cpp'
                 ]),
             make_cuda_ext(
                 name='carafe_cuda',
-                module='mmdet.ops.carafe',
+                module='mmdet2.ops.carafe',
                 sources=['src/carafe_cuda.cpp', 'src/carafe_cuda_kernel.cu']),
             make_cuda_ext(
                 name='carafe_naive_cuda',
-                module='mmdet.ops.carafe',
+                module='mmdet2.ops.carafe',
                 sources=[
                     'src/carafe_naive_cuda.cpp',
                     'src/carafe_naive_cuda_kernel.cu'
                 ]),
-            make_extension('roi_sampling','mmdet.ops')
+            make_extension('roi_sampling','mmdet2.ops')
 
         ],
         cmdclass={'build_ext': BuildExtension},

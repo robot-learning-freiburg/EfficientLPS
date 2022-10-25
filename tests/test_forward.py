@@ -15,8 +15,8 @@ def _get_config_directory():
         repo_dpath = dirname(dirname(__file__))
     except NameError:
         # For IPython development when this __file__ is not defined
-        import mmdet
-        repo_dpath = dirname(dirname(mmdet.__file__))
+        import mmdet2
+        repo_dpath = dirname(dirname(mmdet2.__file__))
     config_dpath = join(repo_dpath, 'configs')
     if not exists(config_dpath):
         raise Exception('Cannot find config path')
@@ -51,7 +51,7 @@ def test_ssd300_forward():
     model, train_cfg, test_cfg = _get_detector_cfg('ssd300_coco.py')
     model['pretrained'] = None
 
-    from mmdet.models import build_detector
+    from mmdet2.models import build_detector
     detector = build_detector(model, train_cfg=train_cfg, test_cfg=test_cfg)
 
     input_shape = (1, 3, 300, 300)
@@ -85,7 +85,7 @@ def test_rpn_forward():
     model, train_cfg, test_cfg = _get_detector_cfg('rpn_r50_fpn_1x.py')
     model['pretrained'] = None
 
-    from mmdet.models import build_detector
+    from mmdet2.models import build_detector
     detector = build_detector(model, train_cfg=train_cfg, test_cfg=test_cfg)
 
     input_shape = (1, 3, 224, 224)
@@ -115,7 +115,7 @@ def test_retina_ghm_forward():
         'ghm/retinanet_ghm_r50_fpn_1x.py')
     model['pretrained'] = None
 
-    from mmdet.models import build_detector
+    from mmdet2.models import build_detector
     detector = build_detector(model, train_cfg=train_cfg, test_cfg=test_cfg)
 
     input_shape = (3, 3, 224, 224)
@@ -181,7 +181,7 @@ def test_cascade_forward():
     # torchvision roi align supports CPU
     model['bbox_roi_extractor']['roi_layer']['use_torchvision'] = True
 
-    from mmdet.models import build_detector
+    from mmdet2.models import build_detector
     detector = build_detector(model, train_cfg=train_cfg, test_cfg=test_cfg)
 
     input_shape = (1, 3, 256, 256)
@@ -199,7 +199,7 @@ def test_cascade_forward():
         gt_labels=gt_labels,
         return_loss=True)
     assert isinstance(losses, dict)
-    from mmdet.apis.train import parse_losses
+    from mmdet2.apis.train import parse_losses
     total_loss = float(parse_losses(losses)[0].item())
     assert total_loss > 0
 
@@ -216,7 +216,7 @@ def test_cascade_forward():
         gt_labels=gt_labels,
         return_loss=True)
     assert isinstance(losses, dict)
-    from mmdet.apis.train import parse_losses
+    from mmdet2.apis.train import parse_losses
     total_loss = float(parse_losses(losses)[0].item())
     assert total_loss > 0
 
@@ -233,7 +233,7 @@ def test_faster_rcnn_forward():
     # torchvision roi align supports CPU
     model['bbox_roi_extractor']['roi_layer']['use_torchvision'] = True
 
-    from mmdet.models import build_detector
+    from mmdet2.models import build_detector
     detector = build_detector(model, train_cfg=train_cfg, test_cfg=test_cfg)
 
     input_shape = (1, 3, 256, 256)
@@ -251,7 +251,7 @@ def test_faster_rcnn_forward():
         gt_labels=gt_labels,
         return_loss=True)
     assert isinstance(losses, dict)
-    from mmdet.apis.train import parse_losses
+    from mmdet2.apis.train import parse_losses
     total_loss = float(parse_losses(losses)[0].item())
     assert total_loss > 0
 
@@ -268,7 +268,7 @@ def test_faster_rcnn_forward():
         gt_labels=gt_labels,
         return_loss=True)
     assert isinstance(losses, dict)
-    from mmdet.apis.train import parse_losses
+    from mmdet2.apis.train import parse_losses
     total_loss = float(parse_losses(losses)[0].item())
     assert total_loss > 0
 
@@ -286,7 +286,7 @@ def test_faster_rcnn_ohem_forward():
     # torchvision roi align supports CPU
     model['bbox_roi_extractor']['roi_layer']['use_torchvision'] = True
 
-    from mmdet.models import build_detector
+    from mmdet2.models import build_detector
     detector = build_detector(model, train_cfg=train_cfg, test_cfg=test_cfg)
 
     input_shape = (1, 3, 256, 256)
@@ -304,7 +304,7 @@ def test_faster_rcnn_ohem_forward():
         gt_labels=gt_labels,
         return_loss=True)
     assert isinstance(losses, dict)
-    from mmdet.apis.train import parse_losses
+    from mmdet2.apis.train import parse_losses
     total_loss = float(parse_losses(losses)[0].item())
     assert total_loss > 0
 
@@ -321,7 +321,7 @@ def test_faster_rcnn_ohem_forward():
         gt_labels=gt_labels,
         return_loss=True)
     assert isinstance(losses, dict)
-    from mmdet.apis.train import parse_losses
+    from mmdet2.apis.train import parse_losses
     total_loss = float(parse_losses(losses)[0].item())
     assert total_loss > 0
 

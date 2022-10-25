@@ -131,7 +131,7 @@ dmypy.json
 #custom
 work_dirs/
 data
-mmdet/version.py
+mmdet2/version.py
 *.pkl
 *.pkl.json
 *.log.json

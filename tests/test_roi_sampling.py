@@ -5,7 +5,7 @@ CommandLine:
 import numpy as np
 import torch
 
-from mmdet.ops.roi_sampling import roi_sampling, invert_roi_bbx
+from mmdet2.ops.roi_sampling import roi_sampling, invert_roi_bbx
 
 
 def test_nms_device_and_dtypes_gpu():

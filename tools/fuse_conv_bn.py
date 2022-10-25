@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 from mmcv.runner import save_checkpoint
 
-from mmdet.apis import init_detector
+from mmdet2.apis import init_detector
 
 
 def fuse_conv_bn(conv, bn):
