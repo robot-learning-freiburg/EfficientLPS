@@ -13,8 +13,12 @@ from .. import builder
 from ..registry import EFFICIENTLPS
 from .base import BaseDetector
 from .KNN import KNN
-from mmdet2.ops.norm import norm_cfg
-from mmdet2.ops.roi_sampling import roi_sampling, invert_roi_bbx
+try:
+    from mmdet2.ops.norm import norm_cfg
+    from mmdet2.ops.roi_sampling import roi_sampling, invert_roi_bbx
+except ImportError:
+    from mmdet.ops.norm import norm_cfg
+    from mmdet.ops.roi_sampling import roi_sampling, invert_roi_bbx
 
 import time
 import cv2
