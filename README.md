@@ -14,6 +14,10 @@ If you find the code useful for your research, please consider citing our paper:
   year={2021}
 }
 ```
+
+<a href="https://github.com/opendr-eu/opendr"><img src="./images/opendr_logo.png" alt="drawing" width="250"/></a><br>
+EfficientPS is also featured in the [OpenDR toolkit](https://github.com/opendr-eu/opendr).
+
 ## Demo
 https://rl.uni-freiburg.de/research/lidar-panoptic
 
