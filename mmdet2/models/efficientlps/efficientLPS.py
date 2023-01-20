@@ -272,7 +272,7 @@ class EfficientLPS(BaseDetector):
 
 
 
-    def simple_test(self, img, img_metas, proposals=None, rescale=False, eval=None):
+    def simple_test(self, img, img_metas, proposals=None, rescale=False, eval=None, return_pred=False):
         x, x_range = self.extract_feat(img, 
                               img_metas[0]['sensor_img_means'][0], 
                               img_metas[0]['sensor_img_stds'][0])
@@ -285,10 +285,14 @@ class EfficientLPS(BaseDetector):
             det_bboxes, det_labels = self.simple_test_bboxes(x, 
                 img_metas, proposal_list, self.test_cfg.rcnn, rescale=rescale)
             if eval is not None:
-                       
-                panoptic_mask, cat_ = self.simple_test_mask_(
-                    x, img_metas, det_bboxes, det_labels, semantic_logits, rescale=rescale)
-                result.append([panoptic_mask, cat_, img_metas])
+                if return_pred:
+                    pred_ = self.simple_test_mask_(
+                        x, img_metas, det_bboxes, det_labels, semantic_logits, rescale=rescale, return_pred=return_pred) 
+                    result.append([pred_, img_metas])
+                else:      
+                    panoptic_mask, cat_ = self.simple_test_mask_(
+                        x, img_metas, det_bboxes, det_labels, semantic_logits, rescale=rescale, return_pred=return_pred)
+                    result.append([panoptic_mask, cat_, img_metas])
         
             else:          
                 bbox_results = bbox2result(det_bboxes, det_labels,
@@ -309,11 +313,14 @@ class EfficientLPS(BaseDetector):
 
                 det_bboxes, det_labels = self.simple_test_bboxes(new_x, 
                     [img_metas[i]], proposal_list, self.test_cfg.rcnn, rescale=rescale)
-
-                panoptic_mask, cat_ = self.simple_test_mask_(
-                    new_x, [img_metas[i]], det_bboxes, det_labels, semantic_logits[i:i+1], rescale=rescale)
-
-                result.append([panoptic_mask, cat_, [img_metas[i]]])
+                if return_pred:
+                    pred_ = self.simple_test_mask_(
+                        new_x, [img_metas[i]], det_bboxes, det_labels, semantic_logits[i:i+1], rescale=rescale, return_pred=return_pred) 
+                    result.append([pred_, [img_metas[i]]])
+                else:
+                    panoptic_mask, cat_ = self.simple_test_mask_(
+                        new_x, [img_metas[i]], det_bboxes, det_labels, semantic_logits[i:i+1], rescale=rescale, return_pred=return_pred)
+                    result.append([panoptic_mask, cat_, [img_metas[i]]])
 
         return result
 
@@ -359,7 +366,7 @@ class EfficientLPS(BaseDetector):
                   det_labels,
                   semantic_logits, 
                   rescale=False):
-
+        print("I have reached simple_test mask' function")
         ori_shape = img_metas[0]['ori_shape']
         scale_factor = img_metas[0]['scale_factor']
         if det_bboxes.shape[0] == 0:
@@ -392,7 +399,8 @@ class EfficientLPS(BaseDetector):
                   det_bboxes,
                   det_labels,
                   semantic_logits, 
-                  rescale=False):
+                  rescale=False,
+                  return_pred=False):
 
         stuff_id = img_metas[0]['stuff_id']
         start = 0
@@ -523,6 +531,8 @@ class EfficientLPS(BaseDetector):
         pred_np = unprojsem_argmax.cpu().numpy()
         pred_np = pred_np.reshape((-1)).astype(np.uint32)
         pred_np = np.uint32(unproj_argmax.cpu().numpy().reshape((-1)).astype(np.uint32) << 16 | pred_np)
+        if return_pred:
+            return pred_np
         path = self.get_path(img_metas)
         pred_np.tofile(path)
 
