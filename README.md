@@ -90,9 +90,13 @@ Run the following command for evaluation:
 ```
 ./tools/dist_test.sh efficientPS_multigpu_sample.py ${CHECKPOINT_FILE} ${GPU_NUM} --eval panoptic
 ```
+## Pre-Trained Models
+| Dataset   |  Model | 
+|-----------|:-----------------:|
+| SemanticKITTI| [Download](https://drive.google.com/file/d/1b8kR7KicdNT5Nlx6Q9TB7vyTqPqt3SPX/view?usp=sharing) | 
 
 ## Acknowledgements
-We have used utility functions from other open-source projects. We espeicially thank the authors of:
+We have used utility functions from other open-source projects. We especially thank the authors of:
 - [mmdetection](https://github.com/open-mmlab/mmdetection)
 - [gen-efficientnet-pytorch](https://github.com/rwightman/gen-efficientnet-pytorch)
 - [semantic-kitti-api](https://github.com/PRBonn/semantic-kitti-api)
