@@ -8,10 +8,14 @@ This repository contains the **PyTorch implementation** of our T-RO'2021 paper [
 If you find the code useful for your research, please consider citing our paper:
 ```
 @article{sirohi2021efficientlps,
-  title={EfficientLPS: Efficient LiDAR Panoptic Segmentation},
+  title={Efficientlps: Efficient lidar panoptic segmentation},
   author={Sirohi, Kshitij and Mohan, Rohit and B{\"u}scher, Daniel and Burgard, Wolfram and Valada, Abhinav},
-  journal={arXiv preprint arXiv:2102.08009},
-  year={2021}
+  journal={IEEE Transactions on Robotics},
+  volume={38},
+  number={3},
+  pages={1894--1914},
+  year={2021},
+  publisher={IEEE}
 }
 ```
 
